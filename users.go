@@ -5,8 +5,12 @@ import (
 	"database/sql"
 )
 
+type DBAccessor interface {
+	QueryRowContext(context.Context, string, ...interface{}) *sql.Row
+}
+
 // IsUser returns whether the provided user exists in the database
-func IsUser(ctx context.Context, db *sql.DB, username string) (bool, error) {
+func IsUser(ctx context.Context, db DBAccessor, username string) (bool, error) {
 	var (
 		count int64
 		query = `SELECT COUNT(*) FROM ( SELECT DISTINCT id FROM users WHERE username = $1 ) AS check_user`
@@ -18,7 +22,7 @@ func IsUser(ctx context.Context, db *sql.DB, username string) (bool, error) {
 }
 
 // UserID returns the user ID string for the given username
-func UserID(ctx context.Context, db *sql.DB, username string) (string, error) {
+func UserID(ctx context.Context, db DBAccessor, username string) (string, error) {
 	var (
 		userID string
 		query  = `SELECT id FROM users WHERE username = $1`
